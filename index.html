@@ -1,0 +1,195 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+<link href='https://fonts.googleapis.com/css?family=Patua+One' rel='stylesheet' type='text/css'>
+<!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-old-ie-min.css">
+<![endif]-->
+<!--[if gt IE 8]><!-->
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-min.css">
+<!--<![endif]-->
+
+<style>
+body{
+}
+.container {
+background: #cefdce;
+text-align: center;
+margin-top: 30px;
+padding-bottom: 30px;
+border: 1px solid #dedede;
+width: 80%;
+margin-left: auto;
+margin-right: auto;
+max-width: 300px;
+}
+.container table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1,h2 {
+font-family: 'Patua One', cursive;
+font-size: 36px;
+color: green;
+}
+
+#loading {
+display: none;
+}
+
+td {
+text-align:center;
+}
+
+h2 {
+font-size: 24px;
+}
+.button-success,
+        .button-error,
+        .button-warning,
+        .button-secondary {
+            color: white;
+        }
+
+        .button-success {
+            background: rgb(0, 0, 2555); /* this is a green */
+        }
+
+        .button-error {
+            background: rgb(202, 60, 60); /* this is a maroon */
+        }
+
+        .button-warning {
+            background: rgb(223, 117, 20); /* this is an orange */
+        }
+
+        .button-secondary {
+            background: rgb(66, 184, 221); /* this is a light blue */
+        }
+        
+        .button-off {
+            color: white;
+            background: black;
+        }
+        </style>
+</head>
+<body>
+
+    <div class="container text-center">
+    <h1>SERRAMATIC</h1>
+
+    <table class="pure-table">
+<thead>
+<tr>
+<th>Temp</th>
+<th>Humidity</th>
+<th>Light</th>
+</tr>
+</thead>
+<tr>
+<td><span id="temp">0</span></td>
+<td><span id="humid">0</span></td>
+<td><span id="light">0</span></td>
+</tr>
+</table>
+
+<h2>LED Control</h2>
+<button class="button-success pure-button"id="blue">Blue</button>
+<button class="button-error pure-button "id="red">Red</button>
+<button class="button-warning pure-button"id="mix">Mix</button>
+<button class="button-off pure-button" id="off">Off</button>
+
+<div id="loading">
+<p style="text-align:center"><img src="loading.gif"> Loading...</p>
+</div>
+
+</div>
+
+
+
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>
+$(document).ready(function(){
+
+ var token = "ded98ba85420fe5983418484923600b740e469d3";
+ var device_id = "37003e001447343338333633";
+ var prefix = "https://api.particle.io/v1/devices/"
+
+ var poll = function(){
+
+    $.get(prefix + device_id + '/' + "temp" +'?access_token=' +token, function(data){
+        
+        if (data.result)
+        $('#temp').html(data.result + "&#x2103;");
+        
+    });
+    $.get(prefix + device_id + '/' + "humid" +'?access_token=' +token, function(data){
+        
+        if (data.result)
+        $('#humid').html(data.result + '%');
+        
+    });
+    $.get(prefix + device_id + '/' + "light" +'?access_token=' +token, function(data){
+        
+        if (data.result) {
+        var base = Number(data.result);
+        var reading = Math.min(100,Math.round(base/1024*100));
+        $('#light').html( reading + '%');
+        }
+    });
+
+ };
+ 
+ var sendCmd = function(cmd){
+    $("#loading").show();
+    $.post(prefix + device_id + '/led',
+    {
+        access_token: token,
+        params: cmd
+    },
+    
+    function(data){
+        console.log(data);
+        $("#loading").hide();
+    });
+ 
+ };
+
+ $('#red').click(function(e){
+    e.preventDefault();
+    sendCmd("red");
+
+ });
+ 
+ $('#blue').click(function(e){
+    e.preventDefault();
+    sendCmd("blue");
+
+ });
+
+ $('#mix').click(function(e){
+    e.preventDefault();
+    sendCmd("mix");
+
+ });
+
+ $('#off').click(function(e){
+    e.preventDefault();
+    sendCmd("off");
+
+ });
+  poll();
+
+  setInterval(poll,3000);
+
+});
+
+</script>
+
+</body>
+
+</html>
